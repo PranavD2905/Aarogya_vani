@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../models/appointment.dart';
 
 class DoctorPatientsScreen extends StatelessWidget {
   const DoctorPatientsScreen({Key? key}) : super(key: key);

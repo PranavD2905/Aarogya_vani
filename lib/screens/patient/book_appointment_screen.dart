@@ -96,7 +96,10 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
       disease: _diseaseController.text,
       details: _detailsController.text,
       severity: _severity,
-      callType: _callType == 'Video' ? CallType.video : CallType.audio,
+      patientName: widget.doctor.name, // TODO: Replace with actual patient name
+      type: _callType == 'Video'
+          ? AppointmentType.video
+          : AppointmentType.audio,
     );
 
     // Add the appointment to the provider

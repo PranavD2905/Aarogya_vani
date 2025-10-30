@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:agora_rtc_engine/agora_rtc_engine.dart';
-import '../services/call_service.dart';
+import '../../services/call_service.dart';
 
 class CallScreen extends StatefulWidget {
   final String channelName;
@@ -55,13 +54,7 @@ class _CallScreenState extends State<CallScreen> {
             // Remote video
             Center(
               child: widget.isVideo
-                  ? AgoraVideoView(
-                      controller: VideoViewController.remote(
-                        rtcEngine: _callService._engine!,
-                        canvas: const VideoCanvas(uid: 0),
-                        connection: const RtcConnection(channelId: ""),
-                      ),
-                    )
+                  ? _callService.getRemoteView(0)
                   : const Icon(Icons.person, size: 100, color: Colors.white),
             ),
             // Local video
@@ -72,12 +65,7 @@ class _CallScreenState extends State<CallScreen> {
                 child: SizedBox(
                   width: 120,
                   height: 160,
-                  child: AgoraVideoView(
-                    controller: VideoViewController(
-                      rtcEngine: _callService._engine!,
-                      canvas: const VideoCanvas(uid: 0),
-                    ),
-                  ),
+                  child: _callService.getLocalView(),
                 ),
               ),
             // Call controls

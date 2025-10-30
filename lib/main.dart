@@ -26,7 +26,8 @@ class MyApp extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (_) => AppointmentProvider(),
       child: MaterialApp(
-        title: 'VEDA',
+        debugShowCheckedModeBanner: false,
+        title: 'Aarogya Vani',
         theme: ThemeData(
           primaryColor: const Color(0xFFFF0000),
           colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFFF0000)),

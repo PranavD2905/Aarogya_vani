@@ -203,7 +203,7 @@ class _AppointmentCard extends StatelessWidget {
   Future<void> _showRescheduleDialog(BuildContext context) async {
     final TimeOfDay? time = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.fromDateTime(appointment.dateTime),
+      initialTime: TimeOfDay.fromDateTime(appointment.date),
     );
 
     if (time != null && context.mounted) {
@@ -247,7 +247,7 @@ class _AppointmentCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  _formatTime(appointment.dateTime),
+                  _formatTime(appointment.date),
                   style: const TextStyle(color: Colors.grey),
                 ),
               ],

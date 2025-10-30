@@ -3,13 +3,12 @@ import 'doctor.dart';
 enum AppointmentType { audio, video }
 
 enum AppointmentStatus {
+  pending, // Initial state when appointment is created
   scheduled, // When doctor accepts
   completed, // When appointment is done
   cancelled, // When either party cancels
   rescheduled, // When appointment is moved to another time
 }
-
-enum CallType { video, audio }
 
 class Appointment {
   final String id;
@@ -18,8 +17,9 @@ class Appointment {
   final String disease;
   final String details;
   final String severity;
-  final CallType callType;
+  final AppointmentType type;
   final AppointmentStatus status;
+  final String patientName; // Added patient name
 
   const Appointment({
     required this.id,
@@ -28,8 +28,9 @@ class Appointment {
     required this.disease,
     required this.details,
     required this.severity,
-    required this.callType,
+    required this.type,
     required this.status,
+    required this.patientName,
   });
 
   // Create a new appointment with pending status
@@ -39,7 +40,8 @@ class Appointment {
     required String disease,
     required String details,
     required String severity,
-    required CallType callType,
+    required AppointmentType type,
+    required String patientName,
   }) {
     return Appointment(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -48,8 +50,9 @@ class Appointment {
       disease: disease,
       details: details,
       severity: severity,
-      callType: callType,
+      type: type,
       status: AppointmentStatus.pending,
+      patientName: patientName,
     );
   }
 
@@ -62,8 +65,9 @@ class Appointment {
       disease: disease,
       details: details,
       severity: severity,
-      callType: callType,
+      type: type,
       status: newStatus ?? status,
+      patientName: patientName,
     );
   }
 }

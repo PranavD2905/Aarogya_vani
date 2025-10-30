@@ -17,12 +17,17 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
     super.initState();
     // Load appointments when screen is opened
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<AppointmentProvider>(context, listen: false)
-          .loadAppointments('doctor1'); // Replace with actual doctor ID
+      Provider.of<AppointmentProvider>(
+        context,
+        listen: false,
+      ).loadAppointments('doctor1'); // Replace with actual doctor ID
     });
   }
 
-  Future<void> _selectDate(BuildContext context, AppointmentProvider provider) async {
+  Future<void> _selectDate(
+    BuildContext context,
+    AppointmentProvider provider,
+  ) async {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: provider.selectedDate ?? DateTime.now(),
@@ -50,10 +55,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                 children: [
                   const Text(
                     'Doctor Dashboard',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 20),
                   // Statistics Cards
@@ -125,9 +127,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                       child: Center(child: CircularProgressIndicator()),
                     )
                   else if (provider.error != null)
-                    Expanded(
-                      child: Center(child: Text(provider.error!)),
-                    )
+                    Expanded(child: Center(child: Text(provider.error!)))
                   else if (appointments.isEmpty)
                     const Expanded(
                       child: Center(child: Text('No appointments found')),
@@ -175,18 +175,12 @@ class _StatisticCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               title,
-              style: const TextStyle(
-                fontSize: 14,
-                color: Colors.grey,
-              ),
+              style: const TextStyle(fontSize: 14, color: Colors.grey),
             ),
             const SizedBox(height: 4),
             Text(
               value,
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
           ],
         ),
@@ -226,8 +220,10 @@ class _AppointmentCard extends StatelessWidget {
         newDateTime = newDateTime.add(const Duration(days: 1));
       }
 
-      Provider.of<AppointmentProvider>(context, listen: false)
-          .rescheduleAppointment(appointment.id, newDateTime);
+      Provider.of<AppointmentProvider>(
+        context,
+        listen: false,
+      ).rescheduleAppointment(appointment.id, newDateTime);
     }
   }
 
@@ -252,24 +248,18 @@ class _AppointmentCard extends StatelessWidget {
                 ),
                 Text(
                   _formatTime(appointment.date),
-                  style: const TextStyle(
-                    color: Colors.grey,
-                  ),
+                  style: const TextStyle(color: Colors.grey),
                 ),
               ],
             ),
             const SizedBox(height: 8),
             Text(
               'Disease: ${appointment.disease}',
-              style: const TextStyle(
-                color: Colors.grey,
-              ),
+              style: const TextStyle(color: Colors.grey),
             ),
             Text(
               'Details: ${appointment.details}',
-              style: const TextStyle(
-                color: Colors.grey,
-              ),
+              style: const TextStyle(color: Colors.grey),
             ),
             const SizedBox(height: 8),
             Text(
@@ -291,12 +281,12 @@ class _AppointmentCard extends StatelessWidget {
                         builder: (context) => CallScreen(
                           channelName: 'appointment_${appointment.id}',
                           patientName: appointment.doctor.name,
-                          isVideo: appointment.callType == CallType.video,
+                          isVideo: appointment.type == AppointmentType.video,
                         ),
                       ),
                     ),
                     icon: Icon(
-                      appointment.callType == CallType.video
+                      appointment.type == AppointmentType.video
                           ? Icons.videocam
                           : Icons.phone,
                     ),

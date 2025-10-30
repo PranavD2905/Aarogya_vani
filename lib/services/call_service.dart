@@ -1,9 +1,9 @@
+import 'package:flutter/material.dart';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class CallService {
-  static const String appId =
-      'YOUR_AGORA_APP_ID'; // TODO: Replace with your Agora App ID
+  static const String appId = 'e619289ca0694fc6a1e9a0e8317b43a5';
 
   RtcEngine? _engine;
   bool _isInitialized = false;
@@ -56,6 +56,10 @@ class CallService {
     await _engine?.muteLocalVideoStream(true);
   }
 
+  Future<void> toggleSpeaker() async {
+    await _engine?.setEnableSpeakerphone(true);
+  }
+
   Future<void> switchCamera() async {
     await _engine?.switchCamera();
   }
@@ -64,5 +68,26 @@ class CallService {
     _engine?.release();
     _engine = null;
     _isInitialized = false;
+  }
+
+  // Get local video view
+  Widget getLocalView() {
+    return AgoraVideoView(
+      controller: VideoViewController(
+        rtcEngine: _engine!,
+        canvas: const VideoCanvas(uid: 0),
+      ),
+    );
+  }
+
+  // Get remote video view
+  Widget getRemoteView(int uid) {
+    return AgoraVideoView(
+      controller: VideoViewController.remote(
+        rtcEngine: _engine!,
+        canvas: VideoCanvas(uid: uid),
+        connection: const RtcConnection(),
+      ),
+    );
   }
 }

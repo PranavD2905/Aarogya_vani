@@ -1,19 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:agora_rtc_engine/agora_rtc_engine.dart';
-import 'package:permission_handler/permission_handler.dart';
 import '../../models/doctor.dart';
-import '../../constants/colors.dart';
+import '../../services/call_service.dart';
 
 class VideoCallScreen extends StatefulWidget {
   final Doctor doctor;
   final String channelName;
-  final String token;
 
   const VideoCallScreen({
     Key? key,
     required this.doctor,
     required this.channelName,
-    required this.token,
   }) : super(key: key);
 
   @override
@@ -21,135 +17,44 @@ class VideoCallScreen extends StatefulWidget {
 }
 
 class _VideoCallScreenState extends State<VideoCallScreen> {
-  int? _remoteUid;
-  bool _localUserJoined = false;
-  late RtcEngine _engine;
+  final CallService _callService = CallService();
   bool _isMuted = false;
-  bool _isCameraOff = false;
+  bool _isVideoEnabled = true;
+  final int _uid = 2; // Use 2 for patient side (doctor uses 1)
 
   @override
   void initState() {
     super.initState();
-    initializeAgora();
+    _initializeCall();
   }
 
-  Future<void> initializeAgora() async {
-    // Request permissions
-    await Permission.microphone.request();
-    await Permission.camera.request();
-
-    // Create RTC engine instance
-    _engine = createAgoraRtcEngine();
-    await _engine.initialize(
-      const RtcEngineContext(
-        appId:
-            "c11684251e9f4cb282551b6348d3bb4a", // Replace with your Agora App ID
-        channelProfile: ChannelProfileType.channelProfileLiveBroadcasting,
-      ),
-    );
-
-    // Enable audio + video for a 1:1 call
-    await _engine.enableAudio();
-    await _engine.enableVideo();
-    await _engine.startPreview();
-
-    // Set up event handlers
-    _engine.registerEventHandler(
-      RtcEngineEventHandler(
-        onJoinChannelSuccess: (connection, elapsed) {
-          setState(() {
-            _localUserJoined = true;
-          });
-        },
-        onUserJoined: (connection, remoteUid, elapsed) {
-          setState(() {
-            _remoteUid = remoteUid;
-          });
-        },
-        onUserOffline: (connection, remoteUid, reason) {
-          setState(() {
-            _remoteUid = null;
-          });
-        },
-      ),
-    );
-
-    // Join the channel
-    await _engine.joinChannel(
-      token: widget.token,
-      channelId: widget.channelName,
-      uid: 0,
-      options: const ChannelMediaOptions(),
+  Future<void> _initializeCall() async {
+    await _callService.initialize();
+    await _callService.joinCall(
+      channelName: widget.channelName,
+      uid: _uid,
+      isVideo: true,
     );
   }
 
   @override
   void dispose() {
-    _engine.leaveChannel();
-    _engine.release();
+    _callService.dispose();
     super.dispose();
   }
 
-  Widget _renderRemoteVideo() {
-    if (_remoteUid != null) {
-      return AgoraVideoView(
-        controller: VideoViewController.remote(
-          rtcEngine: _engine,
-          canvas: VideoCanvas(uid: _remoteUid),
-          connection: RtcConnection(channelId: widget.channelName),
-          useFlutterTexture: true,
-          useAndroidSurfaceView: true,
-        ),
-      );
-    } else {
-      return const Center(
-        child: Text(
-          'Waiting for doctor to join...',
-          style: TextStyle(color: Colors.white),
-        ),
-      );
-    }
-  }
-
-  Widget _renderLocalPreview() {
-    if (_localUserJoined) {
-      return AgoraVideoView(
-        controller: VideoViewController(
-          rtcEngine: _engine,
-          canvas: const VideoCanvas(uid: 0),
-          useFlutterTexture: true,
-          useAndroidSurfaceView: true,
-        ),
-      );
-    } else {
-      return const Center(child: CircularProgressIndicator());
-    }
-  }
-
-  Widget _buildControlButton(
-    IconData icon,
-    String label,
-    bool isActive,
-    VoidCallback onPressed,
-  ) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: isActive ? Colors.white : Colors.white.withOpacity(0.2),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            icon,
-            color: isActive ? Colors.black : Colors.white,
-            size: 24,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(label, style: const TextStyle(color: Colors.white, fontSize: 12)),
-      ],
+  Widget _buildControlButton({
+    required IconData icon,
+    required VoidCallback onPressed,
+    Color backgroundColor = Colors.white24,
+  }) {
+    return RawMaterialButton(
+      onPressed: onPressed,
+      elevation: 2.0,
+      fillColor: backgroundColor,
+      padding: const EdgeInsets.all(12.0),
+      shape: const CircleBorder(),
+      child: Icon(icon, color: Colors.white, size: 24.0),
     );
   }
 
@@ -160,100 +65,70 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
       body: SafeArea(
         child: Stack(
           children: [
-            // Remote Video (Full Screen)
-            _renderRemoteVideo(),
-
-            // Local Video (Small overlay)
+            // Remote video (doctor's video)
+            Center(
+              child: _callService.getRemoteView(1), // Use UID 1 for doctor's video
+            ),
+            // Local video (patient's video)
             Positioned(
               top: 16,
               right: 16,
-              child: Container(
+              child: SizedBox(
                 width: 120,
                 height: 160,
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.white, width: 2),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(6),
-                  child: _renderLocalPreview(),
-                ),
+                child: _callService.getLocalView(),
               ),
             ),
-
-            // Top Bar with Doctor Info
-            Positioned(
-              top: 16,
-              left: 16,
-              child: Row(
-                children: [
-                  CircleAvatar(
-                    radius: 20,
-                    backgroundImage: AssetImage(widget.doctor.imageUrl),
-                    onBackgroundImageError: (_, __) {},
-                    child: Icon(Icons.person, color: Colors.grey[400]),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    widget.doctor.name,
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                ],
-              ),
-            ),
-
-            // Bottom Controls
+            // Call controls
             Positioned(
               bottom: 32,
               left: 0,
               right: 0,
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    InkWell(
-                      onTap: () {
-                        setState(() {
-                          _isMuted = !_isMuted;
-                          _engine.muteLocalAudioStream(_isMuted);
-                        });
-                      },
-                      child: _buildControlButton(
-                        _isMuted ? Icons.mic_off : Icons.mic,
-                        _isMuted ? 'Unmute' : 'Mute',
-                        !_isMuted,
-                        () {},
-                      ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildControlButton(
+                    icon: _isMuted ? Icons.mic_off : Icons.mic,
+                    onPressed: () {
+                      setState(() => _isMuted = !_isMuted);
+                      _callService.toggleMute();
+                    },
+                  ),
+                  _buildControlButton(
+                    icon: Icons.call_end,
+                    backgroundColor: Colors.red,
+                    onPressed: () {
+                      _callService.leaveCall();
+                      Navigator.pop(context);
+                    },
+                  ),
+                  _buildControlButton(
+                    icon: _isVideoEnabled ? Icons.videocam : Icons.videocam_off,
+                    onPressed: () {
+                      setState(() => _isVideoEnabled = !_isVideoEnabled);
+                      _callService.toggleVideo();
+                    },
+                  ),
+                ],
+              ),
+            ),
+            // Doctor info
+            Positioned(
+              top: 24,
+              left: 24,
+              child: Row(
+                children: [
+                  const Icon(Icons.person, color: Colors.white, size: 24),
+                  const SizedBox(width: 8),
+                  Text(
+                    widget.doctor.name,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
                     ),
-                    InkWell(
-                      onTap: () {
-                        Navigator.pop(context);
-                        _engine.leaveChannel();
-                      },
-                      child: _buildControlButton(
-                        Icons.call_end,
-                        'End',
-                        false,
-                        () {},
-                      ),
-                    ),
-                    InkWell(
-                      onTap: () {
-                        setState(() {
-                          _isCameraOff = !_isCameraOff;
-                          _engine.muteLocalVideoStream(_isCameraOff);
-                        });
-                      },
-                      child: _buildControlButton(
-                        _isCameraOff ? Icons.videocam_off : Icons.videocam,
-                        _isCameraOff ? 'Start Video' : 'Stop Video',
-                        !_isCameraOff,
-                        () {},
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ],

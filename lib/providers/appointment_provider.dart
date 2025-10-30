@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/appointment.dart';
+import '../models/doctor.dart';
 
 class AppointmentProvider extends ChangeNotifier {
   final List<Appointment> _appointments = [];
@@ -17,20 +18,20 @@ class AppointmentProvider extends ChangeNotifier {
     return _appointments
         .where(
           (appointment) =>
-              appointment.dateTime.isAfter(now) &&
+              appointment.date.isAfter(now) &&
               appointment.status == AppointmentStatus.scheduled,
         )
         .toList()
-      ..sort((a, b) => a.dateTime.compareTo(b.dateTime));
+      ..sort((a, b) => a.date.compareTo(b.date));
   }
 
   List<Appointment> get filteredAppointments {
     if (_selectedDate == null) return upcomingAppointments;
 
     return upcomingAppointments.where((appointment) {
-      return appointment.dateTime.year == _selectedDate!.year &&
-          appointment.dateTime.month == _selectedDate!.month &&
-          appointment.dateTime.day == _selectedDate!.day;
+      return appointment.date.year == _selectedDate!.year &&
+          appointment.date.month == _selectedDate!.month &&
+          appointment.date.day == _selectedDate!.day;
     }).toList();
   }
 
@@ -58,14 +59,14 @@ class AppointmentProvider extends ChangeNotifier {
       final appointment = _appointments[index];
       _appointments[index] = Appointment(
         id: appointment.id,
-        patientId: appointment.patientId,
-        patientName: appointment.patientName,
-        doctorId: appointment.doctorId,
-        dateTime: newDateTime,
+        doctor: appointment.doctor,
+        date: newDateTime,
         disease: appointment.disease,
-        symptoms: appointment.symptoms,
+        details: appointment.details,
+        severity: appointment.severity,
         type: appointment.type,
         status: AppointmentStatus.rescheduled,
+        patientName: appointment.patientName,
       );
       notifyListeners();
     }
@@ -84,26 +85,37 @@ class AppointmentProvider extends ChangeNotifier {
       notifyListeners();
 
       // Mock appointments
+      // Create a mock doctor
+      final mockDoctor = Doctor(
+        id: doctorId,
+        name: 'Dr. Smith',
+        specialization: 'General',
+        rating: 4.5,
+        imageUrl: 'assets/images/doctor.png',
+      );
+
       _appointments.addAll([
         Appointment(
           id: '1',
-          patientId: 'p1',
-          patientName: 'John Doe',
-          doctorId: doctorId,
-          dateTime: DateTime.now().add(const Duration(hours: 1)),
+          doctor: mockDoctor,
+          date: DateTime.now().add(const Duration(hours: 1)),
           disease: 'Fever',
-          symptoms: 'High temperature, headache',
+          details: 'High temperature, headache',
+          severity: 'Medium',
           type: AppointmentType.video,
+          status: AppointmentStatus.scheduled,
+          patientName: 'John Doe', // Mock patient name
         ),
         Appointment(
           id: '2',
-          patientId: 'p2',
-          patientName: 'Jane Smith',
-          doctorId: doctorId,
-          dateTime: DateTime.now().add(const Duration(hours: 3)),
+          doctor: mockDoctor,
+          date: DateTime.now().add(const Duration(hours: 3)),
           disease: 'Cough',
-          symptoms: 'Dry cough, sore throat',
+          details: 'Dry cough, sore throat',
+          severity: 'Low',
           type: AppointmentType.audio,
+          status: AppointmentStatus.scheduled,
+          patientName: 'Jane Smith', // Mock patient name
         ),
       ]);
 

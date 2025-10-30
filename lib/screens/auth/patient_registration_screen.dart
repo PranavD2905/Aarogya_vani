@@ -4,7 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../models/patient_profile.dart';
 import '../../constants/colors.dart';
-// Firebase functionality removed for now. Persisting profile will be added later.
+import '../../services/patient_profile_service.dart';
 
 class PatientRegistrationScreen extends StatefulWidget {
   const PatientRegistrationScreen({Key? key}) : super(key: key);
@@ -17,27 +17,66 @@ class PatientRegistrationScreen extends StatefulWidget {
 class _PatientRegistrationScreenState extends State<PatientRegistrationScreen> {
   final _formKey = GlobalKey<FormState>();
   final ImagePicker _imagePicker = ImagePicker();
-      // Create patient profile locally (persistence will be added later)
-      final patientId = DateTime.now().millisecondsSinceEpoch.toString();
-      final profile = PatientProfile(
-        id: patientId,
-        name: _nameController.text,
-        photoUrl: _selectedImage?.path ?? '', // local path for now
-        dateOfBirth: _selectedDate!,
-        bloodGroup: _selectedBloodGroup!,
-        sex: _selectedSex!,
-        phoneNumber: _phoneController.text,
-        email: _emailController.text,
-        address: _addressController.text,
-      );
+  File? _selectedImage;
+  DateTime? _selectedDate;
 
-      // Close any dialogs and show success message
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Profile created (local only)')),
-        );
-        Navigator.pushReplacementNamed(context, '/home');
+  // Form controllers
+  final _nameController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _addressController = TextEditingController();
+
+  // Dropdown values
+  String? _selectedBloodGroup;
+  String? _selectedSex;
+
+  final List<String> _bloodGroups = [
+    'A+',
+    'A-',
+    'B+',
+    'B-',
+    'O+',
+    'O-',
+    'AB+',
+    'AB-',
+  ];
+  final List<String> _sexOptions = ['Male', 'Female', 'Other'];
+
+  Future<void> _pickImage() async {
+    final status = await Permission.photos.request();
+
+    if (status.isGranted) {
+      final XFile? image = await _imagePicker.pickImage(
+        source: ImageSource.gallery,
+      );
+      if (image != null) {
+        setState(() {
+          _selectedImage = File(image.path);
+        });
       }
+    } else if (status.isPermanentlyDenied) {
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Permission Required'),
+            content: const Text(
+              'Please enable photo access in app settings to select a profile picture.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => openAppSettings(),
+                child: const Text('Open Settings'),
+              ),
+            ],
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _selectDate(BuildContext context) async {

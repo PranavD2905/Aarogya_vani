@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import '../../constants/colors.dart';
 import '../../models/appointment.dart';
 import '../../providers/appointment_provider.dart';
-import '../../services/agora_service.dart';
 import '../call/video_call_screen.dart';
 import '../call/audio_call_screen.dart';
 
@@ -11,9 +10,9 @@ class AppointmentHistoryScreen extends StatelessWidget {
   const AppointmentHistoryScreen({Key? key}) : super(key: key);
 
   // Show appropriate icon for call type
-  Widget _buildCallIcon(CallType type) {
+  Widget _buildCallIcon(AppointmentType type) {
     return Icon(
-      type == CallType.video ? Icons.videocam : Icons.phone,
+      type == AppointmentType.video ? Icons.videocam : Icons.phone,
       color: Colors.white,
     );
   }
@@ -24,11 +23,13 @@ class AppointmentHistoryScreen extends StatelessWidget {
       case AppointmentStatus.pending:
         return Colors.orange;
       case AppointmentStatus.scheduled:
-        return Colors.green;
-      case AppointmentStatus.completed:
         return Colors.blue;
+      case AppointmentStatus.completed:
+        return Colors.green;
       case AppointmentStatus.cancelled:
         return Colors.red;
+      case AppointmentStatus.rescheduled:
+        return Colors.purple;
     }
   }
 
@@ -46,17 +47,10 @@ class AppointmentHistoryScreen extends StatelessWidget {
     }
 
     try {
-      // Generate channel name and get token
-      final channelName = AgoraService.generateChannelName(
-        doctorId: appointment.doctor.id,
-        patientId: 'patient123', // TODO: Replace with actual patient ID
-      );
-      final token = await AgoraService.getToken(
-        channelName: channelName,
-        uid: 0,
-      );
+      // Use the same channel name format as the doctor side
+      final channelName = 'appointment_${appointment.id}';
 
-      if (appointment.callType == CallType.video) {
+      if (appointment.type == AppointmentType.video) {
         // Start video call
         await Navigator.push(
           context,
@@ -64,7 +58,6 @@ class AppointmentHistoryScreen extends StatelessWidget {
             builder: (context) => VideoCallScreen(
               doctor: appointment.doctor,
               channelName: channelName,
-              token: token,
             ),
           ),
         );
@@ -76,7 +69,6 @@ class AppointmentHistoryScreen extends StatelessWidget {
             builder: (context) => AudioCallScreen(
               doctor: appointment.doctor,
               channelName: channelName,
-              token: token,
             ),
           ),
         );
@@ -238,9 +230,7 @@ class AppointmentHistoryScreen extends StatelessWidget {
                                         ),
                                         onPressed: () =>
                                             _handleCall(context, appointment),
-                                        icon: _buildCallIcon(
-                                          appointment.callType,
-                                        ),
+                                        icon: _buildCallIcon(appointment.type),
                                         label: const Text('Join'),
                                       )
                                     else if (appointment.status ==
