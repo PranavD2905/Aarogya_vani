@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../constants/colors.dart';
 import 'create_account_screen.dart';
+import '../patient/patient_navigation_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -75,7 +76,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   minimumSize: const Size(double.infinity, 50),
                 ),
                 onPressed: () {
-                  // Handle login
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const PatientNavigationScreen(),
+                    ),
+                  );
                 },
                 child: const Text(
                   'Login',
