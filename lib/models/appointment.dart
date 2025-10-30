@@ -1,6 +1,13 @@
 import 'doctor.dart';
 
-enum AppointmentStatus { pending, scheduled, completed, cancelled }
+enum AppointmentType { audio, video }
+
+enum AppointmentStatus {
+  scheduled, // When doctor accepts
+  completed, // When appointment is done
+  cancelled, // When either party cancels
+  rescheduled, // When appointment is moved to another time
+}
 
 enum CallType { video, audio }
 

@@ -48,6 +48,8 @@
 	<key>NSCameraUsageDescription</key>
 	<string>Required for video calls with doctors</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Required for voice and video calls with doctors</string>
+	<string>Required for audio calls with doctors</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Required to select profile picture</string>
 </dict>
 </plist>

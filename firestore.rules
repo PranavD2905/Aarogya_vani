@@ -1,0 +1,24 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /patients/{patientId} {
+      // Allow read access to authenticated users
+      allow read: if request.auth != null;
+      
+      // Allow write access only to the patient's own profile
+      allow write: if request.auth != null && request.auth.uid == patientId;
+      
+      // Validate data structure
+      allow create: if request.auth != null 
+        && request.auth.uid == patientId
+        && request.resource.data.keys().hasAll(['name', 'email', 'phoneNumber', 'dateOfBirth', 'bloodGroup', 'sex', 'address'])
+        && request.resource.data.name is string
+        && request.resource.data.email is string
+        && request.resource.data.email.matches('^[^@]+@[^@]+\\.[^@]+$')
+        && request.resource.data.phoneNumber is string
+        && request.resource.data.phoneNumber.matches('^\\d{10}$')
+        && request.resource.data.bloodGroup in ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-']
+        && request.resource.data.sex in ['Male', 'Female', 'Other'];
+    }
+  }
+}

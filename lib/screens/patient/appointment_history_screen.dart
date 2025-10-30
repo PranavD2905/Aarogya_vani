@@ -252,10 +252,16 @@ class AppointmentHistoryScreen extends StatelessWidget {
                                         ),
                                         onPressed: () {
                                           // Temporary: mark as scheduled for testing
-                                          provider.acceptAppointment(appointment.id);
-                                          ScaffoldMessenger.of(context).showSnackBar(
+                                          provider.acceptAppointment(
+                                            appointment.id,
+                                          );
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
                                             const SnackBar(
-                                              content: Text('Appointment marked as scheduled'),
+                                              content: Text(
+                                                'Appointment marked as scheduled',
+                                              ),
                                             ),
                                           );
                                         },

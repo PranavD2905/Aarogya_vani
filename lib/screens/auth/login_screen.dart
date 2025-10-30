@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../constants/colors.dart';
 import 'create_account_screen.dart';
 import '../patient/patient_navigation_screen.dart';
+import '../doctor/doctor_navigation_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -70,23 +71,53 @@ class _LoginScreenState extends State<LoginScreen> {
                 ],
               ),
               const SizedBox(height: 24),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.black,
-                  minimumSize: const Size(double.infinity, 50),
-                ),
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const PatientNavigationScreen(),
+              // User type selection
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.black,
+                        minimumSize: const Size(double.infinity, 50),
+                      ),
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                const PatientNavigationScreen(),
+                          ),
+                        );
+                      },
+                      child: const Text(
+                        'Patient Login',
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ),
-                  );
-                },
-                child: const Text(
-                  'Login',
-                  style: TextStyle(color: Colors.white),
-                ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primaryRed,
+                        minimumSize: const Size(double.infinity, 50),
+                      ),
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                const DoctorNavigationScreen(),
+                          ),
+                        );
+                      },
+                      child: const Text(
+                        'Doctor Login',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
               OutlinedButton(

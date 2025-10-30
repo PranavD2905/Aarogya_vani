@@ -45,7 +45,8 @@ class _AudioCallScreenState extends State<AudioCallScreen> {
       ),
     );
 
-    // Disable video
+    // Enable audio and ensure video is disabled for audio-only call
+    await _engine.enableAudio();
     await _engine.disableVideo();
 
     // Set up event handlers

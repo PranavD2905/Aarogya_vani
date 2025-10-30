@@ -48,7 +48,8 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
       ),
     );
 
-    // Enable video
+    // Enable audio + video for a 1:1 call
+    await _engine.enableAudio();
     await _engine.enableVideo();
     await _engine.startPreview();
 
