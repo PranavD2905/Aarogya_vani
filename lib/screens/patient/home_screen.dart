@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../constants/colors.dart';
 import '../../models/doctor.dart';
+import 'book_appointment_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -11,18 +12,35 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _searchController = TextEditingController();
+  int _pressedIndex = -1;
   List<Doctor> doctors = [
     Doctor(
+      id: 'doc1',
       name: 'Dr. John Doe',
       specialization: 'Cardiologist',
       rating: 4.5,
       imageUrl: 'assets/images/doctor1.png',
     ),
     Doctor(
+      id: 'doc2',
       name: 'Dr. Jane Smith',
       specialization: 'Pediatrician',
       rating: 4.8,
       imageUrl: 'assets/images/doctor2.png',
+    ),
+    Doctor(
+      id: 'doc3',
+      name: 'Dr. Sarah Wilson',
+      specialization: 'Dermatologist',
+      rating: 4.7,
+      imageUrl: 'assets/images/doctor3.png',
+    ),
+    Doctor(
+      id: 'doc4',
+      name: 'Dr. Michael Chen',
+      specialization: 'Neurologist',
+      rating: 4.9,
+      imageUrl: 'assets/images/doctor4.png',
     ),
     // Add more doctors as needed
   ];
@@ -141,16 +159,53 @@ class _HomeScreenState extends State<HomeScreen> {
                             Column(
                               children: [
                                 ElevatedButton(
-                                  onPressed: () {
-                                    // TODO: Implement book appointment
+                                  onPressed: () async {
+                                    // Visual indicator: briefly change the button appearance
+                                    setState(() => _pressedIndex = index);
+                                    await Future.delayed(
+                                      const Duration(milliseconds: 160),
+                                    );
+                                    debugPrint(
+                                      'Book button tapped for ${doctor.name}',
+                                    );
+                                    try {
+                                      await Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              BookAppointmentScreen(
+                                                doctor: doctor,
+                                              ),
+                                        ),
+                                      );
+                                    } catch (e, st) {
+                                      debugPrint('Navigation error: $e\n$st');
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            'Could not open booking screen: $e',
+                                          ),
+                                        ),
+                                      );
+                                    } finally {
+                                      setState(() => _pressedIndex = -1);
+                                    }
                                   },
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppColors.primaryRed,
+                                    backgroundColor: _pressedIndex == index
+                                        ? AppColors.primaryRed.withOpacity(0.7)
+                                        : AppColors.primaryRed,
+                                    foregroundColor: Colors.white,
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 16,
                                     ),
                                   ),
-                                  child: const Text('Book'),
+                                  child: const Text(
+                                    'Book',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
                                 ),
                                 const SizedBox(height: 8),
                                 OutlinedButton(
