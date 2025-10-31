@@ -6,12 +6,18 @@ This project addresses the language barrier in rural telemedicine consultations 
 
 ## Features
 
-- **Speech-to-Text (STT)** using advanced AI models like Whisper  
-- **Real-time Translation** between multiple Indian languages via **Bhashini API**  
-- **Text-to-Speech (TTS)** for natural voice output  
-- **Multi-language Chat Interface** for live doctor-patient conversations  
-- **FastAPI Backend** for handling model pipelines and REST APIs  
-- **Modular Architecture** for easy integration and scalability  
+- **AI Translation Engine**: Provides instant speech and text translation between multiple regional languages and English.
+  
+- **Low Latency Communication**: Optimized for real-time performance during live audio-video consultations.
+- **Speech-to-Text and Text-to-Speech**: Converts patient speech to translated text and synthesizes the doctor’s response back into the patient’s language.
+
+- **Seamless Integration**: Easily integrates with popular telemedicine platforms and APIs.
+ 
+- **User-Friendly Interface**: Simple and accessible design tailored for rural users with limited digital literacy.
+  
+- **Emotion Detection (Bonus)**: Detects emotional tone during conversations to help doctors respond empathetically and adjusts AI voice tone for better comfort.
+Tech Stack
+ 
 
 
 ## Tech Stack
